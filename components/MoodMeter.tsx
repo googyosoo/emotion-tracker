@@ -125,13 +125,12 @@ export default function MoodMeter({
                                     key={emotion.id}
                                     onClick={() => handleEmotionClick(emotion)}
                                     className={`px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${isSelected
-                                            ? 'ring-2 ring-offset-2 scale-105'
-                                            : 'hover:scale-105'
+                                        ? 'ring-2 ring-offset-2 scale-105'
+                                        : 'hover:scale-105'
                                         }`}
                                     style={{
                                         backgroundColor: isSelected ? quadrantColors[activeQuadrant].bg : `${quadrantColors[activeQuadrant].bg}40`,
-                                        color: isSelected ? quadrantColors[activeQuadrant].text : quadrantColors[activeQuadrant].bg,
-                                        ringColor: quadrantColors[activeQuadrant].bg
+                                        color: isSelected ? quadrantColors[activeQuadrant].text : quadrantColors[activeQuadrant].bg
                                     }}
                                 >
                                     {emotion.korean}
