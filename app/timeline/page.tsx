@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import LoginButton from '@/components/LoginButton';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { quadrantColors } from '@/lib/emotions';
 
 interface EmotionRecord {
@@ -44,18 +44,16 @@ export default function TimelinePage() {
                 let q;
 
                 if (isAdmin && viewMode === 'all') {
-                    // 관리자: 모든 학생 기록 조회
+                    // 관리자: 모든 학생 기록 조회 (단순 쿼리로 변경)
                     q = query(
                         collection(db, 'emotions'),
-                        orderBy('date', 'desc'),
                         limit(100)
                     );
                 } else {
-                    // 일반 사용자 또는 관리자의 '내 기록' 모드
+                    // 일반 사용자 또는 관리자의 '내 기록' 모드 (단순 쿼리로 변경)
                     q = query(
                         collection(db, 'emotions'),
                         where('userId', '==', user.uid),
-                        orderBy('date', 'desc'),
                         limit(50)
                     );
                 }
@@ -157,8 +155,8 @@ export default function TimelinePage() {
                             <button
                                 onClick={() => setViewMode('my')}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'my'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 내 기록
@@ -166,8 +164,8 @@ export default function TimelinePage() {
                             <button
                                 onClick={() => setViewMode('all')}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'all'
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 전체 학생 기록
@@ -187,8 +185,8 @@ export default function TimelinePage() {
                             <button
                                 onClick={() => setFilterQuadrant('all')}
                                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${filterQuadrant === 'all'
-                                        ? 'bg-gray-800 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-gray-800 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 전체
@@ -198,8 +196,8 @@ export default function TimelinePage() {
                                     key={q}
                                     onClick={() => setFilterQuadrant(q)}
                                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${filterQuadrant === q
-                                            ? 'ring-2 ring-offset-2'
-                                            : 'hover:opacity-80'
+                                        ? 'ring-2 ring-offset-2'
+                                        : 'hover:opacity-80'
                                         }`}
                                     style={{
                                         backgroundColor: quadrantColors[q].bg,

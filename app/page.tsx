@@ -86,23 +86,17 @@ export default function Home() {
   // 로그인 필요
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col">
-        {/* 상단 앱 소개 */}
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="glass-card rounded-3xl p-8 max-w-md w-full text-center animate-slide-up">
-            <div className="text-6xl mb-6">🎭</div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              감정 기록 앱
-            </h1>
-            <p className="text-gray-600">
-              매일 나의 감정을 기록하고<br />
-              나를 더 잘 이해해보세요
-            </p>
-          </div>
-        </div>
-
-        {/* 하단 고정 로그인 버튼 */}
-        <div className="fixed bottom-8 left-0 right-0 flex justify-center px-4 pb-safe">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass-card rounded-3xl p-8 max-w-md w-full text-center animate-slide-up">
+          <div className="text-6xl mb-6">🎭</div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            감정 기록 앱
+          </h1>
+          <p className="text-gray-600 mb-8">
+            매일 나의 감정을 기록하고<br />
+            나를 더 잘 이해해보세요
+          </p>
+          {/* 로그인 버튼 - 문구 바로 아래 */}
           <LoginButton />
         </div>
       </div>

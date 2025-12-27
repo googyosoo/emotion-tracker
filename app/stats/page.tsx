@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import LoginButton from '@/components/LoginButton';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { quadrantColors } from '@/lib/emotions';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import {
@@ -69,18 +69,16 @@ export default function StatsPage() {
                 let q;
 
                 if (isAdmin && viewMode === 'all') {
-                    // 관리자: 모든 학생 기록 조회
+                    // 관리자: 모든 학생 기록 조회 (단순 쿼리로 변경)
                     q = query(
                         collection(db, 'emotions'),
-                        orderBy('date', 'desc'),
                         limit(200)
                     );
                 } else {
-                    // 일반 사용자
+                    // 일반 사용자 (단순 쿼리로 변경)
                     q = query(
                         collection(db, 'emotions'),
                         where('userId', '==', user.uid),
-                        orderBy('date', 'desc'),
                         limit(100)
                     );
                 }
@@ -342,8 +340,8 @@ ${JSON.stringify(recordsSummary, null, 2)}
                             <button
                                 onClick={() => { setViewMode('my'); setAiFeedback(''); }}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'my'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 내 통계
@@ -351,8 +349,8 @@ ${JSON.stringify(recordsSummary, null, 2)}
                             <button
                                 onClick={() => { setViewMode('all'); setAiFeedback(''); }}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'all'
-                                        ? 'bg-purple-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
                                 전체 학생 통계

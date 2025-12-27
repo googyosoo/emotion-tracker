@@ -8,6 +8,11 @@ export default function Navigation() {
     const pathname = usePathname();
     const { user, isAdmin } = useAuth();
 
+    // 로그인하지 않은 경우 네비게이션 숨김
+    if (!user) {
+        return null;
+    }
+
     const navItems = [
         {
             href: '/',
