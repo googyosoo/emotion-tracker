@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { User, onAuthStateChanged, signInWithPopup, signOut, browserPopupRedirectResolver } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
 // 관리자(교사) 이메일 목록
@@ -39,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
+    // 인증 상태 감지
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
@@ -56,8 +57,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
-        } catch (error) {
+            // browserPopupRedirectResolver를 명시적으로 사용하여 COOP 문제 완화
+            await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+        } catch (error: unknown) {
+            // 사용자가 팝업을 닫은 경우는 무시
+            if (error && typeof error === 'object' && 'code' in error) {
+                const firebaseError = error as { code: string };
+                if (firebaseError.code === 'auth/popup-closed-by-user') {
+                    console.log('사용자가 로그인 팝업을 닫았습니다.');
+                    return;
+                }
+                // COOP 관련 에러도 무시 (실제 로그인은 성공할 수 있음)
+                if (firebaseError.code === 'auth/popup-blocked') {
+                    console.warn('팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.');
+                    alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.');
+                    return;
+                }
+            }
             console.error('로그인 오류:', error);
             throw error;
         }
