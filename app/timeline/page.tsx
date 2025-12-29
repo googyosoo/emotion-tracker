@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { useRouter } from 'next/navigation';
 import LoginButton from '@/components/LoginButton';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
@@ -15,6 +16,7 @@ interface EmotionRecord {
     gratitude: string;
     userName?: string;
     userEmail?: string;
+    userId?: string;
     emotions: {
         id: string;
         korean: string;
@@ -26,6 +28,7 @@ interface EmotionRecord {
 
 export default function TimelinePage() {
     const { user, loading, isAdmin } = useAuth();
+    const router = useRouter();
     const [records, setRecords] = useState<EmotionRecord[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filterQuadrant, setFilterQuadrant] = useState<string>('all');
@@ -117,6 +120,39 @@ export default function TimelinePage() {
         return true;
     });
 
+    // CSV 내보내기 함수
+    const exportToCSV = () => {
+        if (filteredRecords.length === 0) return;
+
+        const headers = ['날짜', '시간', '이름', '이메일', '감정', '오늘의 일', '감사한 일'];
+        const rows = filteredRecords.map(record => [
+            record.date,
+            record.time,
+            record.userName || '',
+            record.userEmail || '',
+            record.emotions?.map(e => e.korean).join(', ') || '',
+            `"${(record.todayEvent || '').replace(/"/g, '""')}"`,
+            `"${(record.gratitude || '').replace(/"/g, '""')}"`,
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `감정기록_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    };
+
+    // 학생 상세 페이지로 이동
+    const goToStudentDetail = (userId: string) => {
+        router.push(`/student/${userId}`);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -165,7 +201,7 @@ export default function TimelinePage() {
 
                     {/* 관리자 전용: 보기 모드 전환 */}
                     {isAdmin && (
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-3 flex gap-2 flex-wrap">
                             <button
                                 onClick={() => setViewMode('my')}
                                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'my'
@@ -184,6 +220,17 @@ export default function TimelinePage() {
                             >
                                 전체 학생 기록
                             </button>
+                            {viewMode === 'all' && filteredRecords.length > 0 && (
+                                <button
+                                    onClick={exportToCSV}
+                                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-all flex items-center gap-1"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    CSV 다운로드
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -323,12 +370,18 @@ export default function TimelinePage() {
                                 className="glass-card rounded-2xl p-4 animate-slide-up"
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
-                                {/* 관리자 모드: 학생 정보 표시 */}
+                                {/* 관리자 모드: 학생 정보 표시 (클릭 시 상세 페이지) */}
                                 {isAdmin && viewMode === 'all' && (
                                     <div className="mb-2 pb-2 border-b border-gray-100">
-                                        <span className="text-xs font-medium text-purple-600">
+                                        <button
+                                            onClick={() => record.userId && goToStudentDetail(record.userId)}
+                                            className="text-xs font-medium text-purple-600 hover:text-purple-800 hover:underline flex items-center gap-1"
+                                        >
                                             👤 {record.userName || '익명'} ({record.userEmail || '이메일 없음'})
-                                        </span>
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 )}
 
