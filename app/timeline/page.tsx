@@ -31,6 +31,8 @@ export default function TimelinePage() {
     const [filterQuadrant, setFilterQuadrant] = useState<string>('all');
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
+    const [filterName, setFilterName] = useState('');
+    const [filterEmail, setFilterEmail] = useState('');
     const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
     const [error, setError] = useState<string | null>(null);
 
@@ -99,6 +101,18 @@ export default function TimelinePage() {
         // 날짜 필터
         if (filterStartDate && record.date < filterStartDate) return false;
         if (filterEndDate && record.date > filterEndDate) return false;
+
+        // 관리자 모드: 이름 필터
+        if (isAdmin && viewMode === 'all' && filterName) {
+            const nameMatch = record.userName?.toLowerCase().includes(filterName.toLowerCase());
+            if (!nameMatch) return false;
+        }
+
+        // 관리자 모드: 이메일 필터
+        if (isAdmin && viewMode === 'all' && filterEmail) {
+            const emailMatch = record.userEmail?.toLowerCase().includes(filterEmail.toLowerCase());
+            if (!emailMatch) return false;
+        }
 
         return true;
     });
@@ -178,6 +192,33 @@ export default function TimelinePage() {
                 <div className="glass-card rounded-2xl p-4 animate-slide-up">
                     <h2 className="font-bold text-gray-800 mb-3">🔍 필터</h2>
 
+                    {/* 관리자 전용: 이름/이메일 필터 */}
+                    {isAdmin && viewMode === 'all' && (
+                        <div className="mb-4 p-3 bg-purple-50 rounded-xl">
+                            <label className="text-xs text-purple-600 font-medium block mb-2">👤 학생 검색</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="이름 검색..."
+                                        value={filterName}
+                                        onChange={(e) => setFilterName(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-purple-200 text-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200"
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        placeholder="이메일 검색..."
+                                        value={filterEmail}
+                                        onChange={(e) => setFilterEmail(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-purple-200 text-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* 감정 필터 */}
                     <div className="mb-3">
                         <label className="text-xs text-gray-500 block mb-2">감정 색상</label>
@@ -236,12 +277,14 @@ export default function TimelinePage() {
                     </div>
 
                     {/* 필터 초기화 */}
-                    {(filterQuadrant !== 'all' || filterStartDate || filterEndDate) && (
+                    {(filterQuadrant !== 'all' || filterStartDate || filterEndDate || filterName || filterEmail) && (
                         <button
                             onClick={() => {
                                 setFilterQuadrant('all');
                                 setFilterStartDate('');
                                 setFilterEndDate('');
+                                setFilterName('');
+                                setFilterEmail('');
                             }}
                             className="mt-3 text-sm text-indigo-600 hover:text-indigo-800"
                         >

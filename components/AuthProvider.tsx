@@ -38,6 +38,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    // 클라이언트 마운트 확인 (Hydration 에러 방지)
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // 인증 상태 감지
     useEffect(() => {
@@ -88,9 +94,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     };
 
+    // 클라이언트 마운트 전에는 로딩 상태 표시 (Hydration 에러 방지)
+    if (!mounted) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="glass-card rounded-3xl p-8 text-center">
+                    <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-gray-600">로딩 중...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={{ user, loading, isAdmin, signInWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );
 }
+
