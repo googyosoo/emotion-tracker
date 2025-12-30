@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import LoginButton from '@/components/LoginButton';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, deleteDoc, doc } from 'firebase/firestore';
 import { quadrantColors } from '@/lib/emotions';
 
 interface EmotionRecord {
@@ -38,6 +38,8 @@ export default function TimelinePage() {
     const [filterEmail, setFilterEmail] = useState('');
     const [viewMode, setViewMode] = useState<'my' | 'all'>('my');
     const [error, setError] = useState<string | null>(null);
+    const [deleteModalId, setDeleteModalId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -151,6 +153,21 @@ export default function TimelinePage() {
     // 학생 상세 페이지로 이동
     const goToStudentDetail = (userId: string) => {
         router.push(`/student/${userId}`);
+    };
+
+    // 기록 삭제
+    const handleDelete = async (recordId: string) => {
+        setIsDeleting(true);
+        try {
+            await deleteDoc(doc(db, 'emotions', recordId));
+            setRecords(prev => prev.filter(r => r.id !== recordId));
+            setDeleteModalId(null);
+        } catch (err) {
+            console.error('삭제 오류:', err);
+            alert('삭제 중 오류가 발생했습니다.');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     if (loading) {
@@ -439,11 +456,55 @@ export default function TimelinePage() {
                                         </p>
                                     </div>
                                 )}
+
+                                {/* 삭제 버튼 - 본인 기록만 */}
+                                {(viewMode === 'my' || record.userId === user?.uid) && (
+                                    <div className="mt-3 pt-2 border-t border-gray-100 flex justify-end">
+                                        <button
+                                            onClick={() => setDeleteModalId(record.id)}
+                                            className="text-xs text-red-400 hover:text-red-600 flex items-center gap-1"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            삭제
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* 삭제 확인 모달 */}
+            {deleteModalId && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="glass-card rounded-2xl p-6 max-w-sm w-full animate-slide-up">
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">🗑️ 기록 삭제</h3>
+                        <p className="text-gray-600 text-sm mb-4">
+                            이 기록을 삭제하면 복구할 수 없어요.<br />
+                            정말 삭제하시겠어요?
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setDeleteModalId(null)}
+                                className="flex-1 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all"
+                                disabled={isDeleting}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={() => handleDelete(deleteModalId)}
+                                disabled={isDeleting}
+                                className="flex-1 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-all disabled:opacity-50"
+                            >
+                                {isDeleting ? '삭제 중...' : '삭제'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

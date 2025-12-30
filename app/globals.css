@@ -3,6 +3,23 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --gradient-start: #667eea;
+  --gradient-end: #764ba2;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card-bg: rgba(30, 41, 59, 0.95);
+  --card-border: rgba(51, 65, 85, 0.5);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --gradient-start: #1e1b4b;
+  --gradient-end: #312e81;
 }
 
 @theme inline {
@@ -13,10 +30,11 @@
 }
 
 body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   min-height: 100vh;
   color: var(--foreground);
   font-family: 'Pretendard', Arial, Helvetica, sans-serif;
+  transition: background 0.3s ease;
 }
 
 /* 커스텀 애니메이션 */
@@ -25,6 +43,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -36,6 +55,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -43,9 +63,12 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
   }
@@ -65,10 +88,61 @@ body {
 
 /* 글래스모피즘 카드 */
 .glass-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--card-border);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s ease, border 0.3s ease;
+}
+
+.dark .glass-card {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* 다크모드 텍스트 */
+.dark .text-gray-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: rgba(51, 65, 85, 0.7) !important;
+}
+
+.dark .border-gray-100 {
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark .border-gray-200 {
+  border-color: rgba(71, 85, 105, 0.5) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #f1f5f9;
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
 }
 
 /* 스크롤바 스타일 */
@@ -114,4 +188,10 @@ select:focus {
 
 .btn-primary:active {
   transform: translateY(0);
+}
+
+/* 다크모드 네비게이션 */
+.dark nav {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(51, 65, 85, 0.5) !important;
 }
